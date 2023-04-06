@@ -13,11 +13,11 @@ the game still calls all the fmod functions but they all direct to here since it
 and now all the fmod functions now operate on the fmod_sound type.
 
 so what i had to do was recreate an fmod_sound for each fmod event. defining the sound list for each event would've been exhausting, so what i've opted to do is make the original steam game play every sound event for 8 seconds,
-recording it, and then correctly matching up each sound recording the event name. then, in the default case for the soundlist switch statement, if there
-is no custom definition for this event, it just gives the soundlist the automatically generated sound recording, and in addition if there is no custom definition for the fmod_sound switch statement, 
-it just plays all the sounds in the soundlist, thus covering every single sound that isn't just "play a sound file".
+recording it, and then correctly matching up each sound recording with the event name. then, in the default case for the soundlist switch statement, if there
+is no custom case for the event, it just gives the soundlist the automatically generated sound recording, and in addition if there is no custom case for the fmod_sound switch statement, 
+it just plays a random sound from the soundlist, thus covering the majority of the games' sounds, since most of them are just "play a sound".
 the rest have been defined manually, by me. for example, the barrel bump sound event ("event:/sfx/barrel/bump") can play one of 7 sound files! using this method, the sound that was recorded will get played, and none of the other 6.
-so i had to manually take the 7 wav files out from the fmod bank file and place them in the port, linking all of them in the soundlist switch statement, and also adding a case for it in the fmod_sound switch statement, since it's a positional sound.
+so i had to manually take the 7 wav files out from the fmod bank file and place them in the port, linking all of them in the soundlist switch statement, and also adding a case for it in the fmod_sound switch statement, since it's a positional sound. (it needs to use the fmod_sound_3d constructor)
 all the music tracks were manually defined as well.
 to anyone who wants to use this i leave replicating this task up to you :)
 (you could also dump the sounds from the port if you know how. i don't mind)
@@ -31,6 +31,7 @@ the replacement for fmod events. each has a soundlist, which is every sound that
 information about the gain and pitch, looping and such. some may have statefuncs, which are functions that are called
 when the game tries to change the state of an event, stepfuncs, which are run on every frame by soundwatchers (see below),
 otherfuncs, for anytime the game tries to change a variable that isn't state (very rare), and stopfuncs, which run when the sound is stopped.
+for positional sounds, there is fmod_sound_3d, which is the same but has a gamemaker audio emitter. all positional sounds need a custom case in the fmod_sound switch statement.
 these allow you to customize an fmod_sound easily to mimic what the original fmod event does.
 there are several functions at the bottom which return "preset" fmod sounds for music,
 since most of the music events are just "play an intro section and then loop this bit" like john gutter
