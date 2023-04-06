@@ -7,24 +7,22 @@ you may do whatever you want with it. credit would be nice.
 some important information:
 
 from what i've learned from this game, fmod does not have sounds, but events.
-events can play multiple sounds, and you can pass parameters to them that have some effect on the sound.
+events can play multiple sounds, apply effects on those sounds, play them with specific timings, a lot of things. most importantly you can pass parameters to them that have some effect on the sound.
 what this file does is replace this fmod event type with my own fmod_sound type.
 the game still calls all the fmod functions but they all direct to here since it's been removed,
 and now all the fmod functions now operate on the fmod_sound type.
 
-defining the sound list for each sound would've been exhausting. so what i've opted to do is make the original steam game play every sound for 8 seconds,
-recording it, and then correctly matching up each sound recording to a name which is just the event name. then, in the default case for both the soundlist switch statement, if there
-is no custom definition for this event, it just gives the soundlist one audio file, the automatically generated recording file. if there is no custom definition for the fmod_sound switch statement, it just plays
-all the sounds in the soundlist, thus covering every single sound that isn't just "play a sound file".
-the rest have been defined manually. for example, the barrel bump sound event can play one of 7 sound files! using this method, the sound that was recorded will get played, and none of the other 6.
-so i had to manually take those files out from the fmod bank and place them in the port.
+so what i had to do was recreate an fmod_sound for each fmod event. defining the sound list for each event would've been exhausting, so what i've opted to do is make the original steam game play every sound event for 8 seconds,
+recording it, and then correctly matching up each sound recording the event name. then, in the default case for the soundlist switch statement, if there
+is no custom definition for this event, it just gives the soundlist the automatically generated sound recording, and in addition if there is no custom definition for the fmod_sound switch statement, 
+it just plays all the sounds in the soundlist, thus covering every single sound that isn't just "play a sound file".
+the rest have been defined manually, by me. for example, the barrel bump sound event ("event:/sfx/barrel/bump") can play one of 7 sound files! using this method, the sound that was recorded will get played, and none of the other 6.
+so i had to manually take the 7 wav files out from the fmod bank file and place them in the port, linking all of them in the soundlist switch statement, and also adding a case for it in the fmod_sound switch statement, since it's a positional sound.
 all the music tracks were manually defined as well.
 to anyone who wants to use this i leave replicating this task up to you :)
 (you could also dump the sounds from the port if you know how. i don't mind)
 
 print() just leads to show_debug_message, i had a custom function for it since calling it a lot really lags gamemaker for some god forsaken reason so i could easily empty the function to test the game without lag spikes.
-
-this file might have references to other functions or variables or whatever used in the port i'm too lazy to include those figure it out
 
 about the structs:
 
@@ -50,8 +48,7 @@ i did not realize the scope needed to replace fmod for this game,
 and that should be a satisfactory answer to why i do x in this specific way
 
 i modified random parts of the pizza tower source code to make specific sounds behave.
-over time, some of these changes may have become obsolete due to me refining the code,
-but do not expect this to just work without any modifications
+over time, some of these changes may have become obsolete due to me refining the code, but do not expect this to just work perfectly without any modifications. 
 
 if you have any questions open an issue on this repository. you could also post bug reports there for the port. i am looking.
 
@@ -61,6 +58,7 @@ and definitely not on 4chan, and i have never used the hard-r, like the guy clai
 
 happy porting,
 -D
+
 */
 function fmod_init(num) {
 	global.sounds_to_play = ds_list_create()
@@ -272,7 +270,7 @@ function fmod_event_one_shot(str) {
 	var snd = fmod_event_create_instance(str)
 	with (snd) {
 		if !is_struct(soundwatcher)
-			soundwatcher = add_soundwatcher([-1, -1], noone, looping, self) // see comment in the soundwatchers' for loop
+			soundwatcher = add_soundwatcher([-1, -1], noone, looping, self) 
 		else
 			soundwatcher.struct = self
 	}
